@@ -10,9 +10,17 @@ theme: black
 - records your test suite's HTTP interactions and replays them during future test runs for fast, deterministic, accurate tests
 - [https://github.com/vcr/vcr](https://github.com/vcr/vcr)
 
+# How it works?
+
+- checking HTTP method and URI (and optionally body)
+- matchers for nondeterministic URIs
+- integrates with RSpec nicely
+
 # Time for a Demo
 
-# Why we use it?
+
+
+# Why we used it?
 
 ## 45 Minute CI Build
 ![slow build](slow_build.png)
@@ -25,19 +33,17 @@ theme: black
 
 ## Solution Attempt #1
 
-- we tried running unit tests with every PR and integration tests only once a day
+- running unit tests with every PR and integration tests only once a day
 - too many bugs getting to the develop branch
 - we would learn about our bugs the next day (after switching context)
 
-## Solution
+## The Solution
 
 > With VCR, the same test suite finishes in under 5 minutes. That's 88% faster!
 ![fast build](fast_build.png)
 
-## Our VCR Setup
+## VCR Setup
 
-- checking HTTP method and URI (not body)
-- matchers for nondeterministic URIs
 - live tests [running every day](https://travis-ci.org/gooddata/gooddata-ruby/builds/520872126)
 
 # Problems
@@ -55,7 +61,7 @@ theme: black
 - recording cassettes could be automated
 - writing matchers cannot be automated
 - problems with recording from the middle of the test suite (e.g. [project cache](https://github.com/gooddata/gooddata-ruby/blob/master/spec/vcr_configurer.rb#L65-L71))
-
+- where to store 390M of cassettes?
 
 ## Unit Tests?
 - it's tempting not to write unit tests
