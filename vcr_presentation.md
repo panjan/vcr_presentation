@@ -12,13 +12,10 @@ theme: black
 
 # How it works?
 
-- checking HTTP method and URI (and optionally body)
+- checks HTTP method and URI (and optionally body)
 - matchers for nondeterministic URIs
-- integrates with RSpec nicely
 
 # Time for a Demo
-
-
 
 # Why we used it?
 
