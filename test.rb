@@ -8,8 +8,8 @@ end
 
 describe "VCR", :vcr do
   it 'records an http request' do
-    10.times do
-      Net::HTTP.get_response('localhost', '/', 4567)
+    5.times do
+      puts Net::HTTP.get_response('localhost', '/', 4567).body
     end
   end
 end

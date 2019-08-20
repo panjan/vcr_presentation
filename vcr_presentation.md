@@ -18,7 +18,11 @@ theme: black
 # Time for a Demo
 
 <aside class="notes">
-    Explain server.rb, test.rb.
+    1) explain server.rb
+    2) explain test.rb
+    3) bundle exec rspec test.rb
+    4) git status & explain ./cassettes
+    5) run test again - fast and deterministic this time
 </aside>
 
 # Why we used it?
