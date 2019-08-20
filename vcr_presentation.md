@@ -11,6 +11,8 @@ theme: black
 - [https://github.com/vcr/vcr](https://github.com/vcr/vcr)
 
 <aside class="notes">
+    Before presentation rm -rf cassettes/
+
     Was using VCR in my previous job. I'd like to talk about how it helped us to a fast and stable continuous integration. But also about problems we had with it.
 </aside>
 
@@ -20,8 +22,9 @@ theme: black
     1) explain server.rb
     2) explain test.rb
     3) bundle exec rspec test.rb
-    4) git status & explain ./cassettes
-    5) run test again - fast and deterministic this time
+    4) run test again - fast and deterministic this time
+    5) git status & explain ./cassettes
+    6) test.rb: 5.times -> 6.times and run test again
 </aside>
 
 # How it works?
