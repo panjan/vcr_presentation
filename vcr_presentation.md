@@ -32,6 +32,12 @@ theme: black
 - checks HTTP method and URI (and optionally body)
 - matchers for nondeterministic URIs
 
+``` ruby
+config.register_request_matcher :my_matcher do |req_1, req_2|
+  # compare requests here
+end
+```
+
 <aside class="notes">
     I came to the company to work on a project which had a...
 </aside>
