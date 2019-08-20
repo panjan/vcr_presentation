@@ -17,6 +17,10 @@ theme: black
 
 # Time for a Demo
 
+<aside class="notes">
+    Explain server.rb, test.rb.
+</aside>
+
 # Why we used it?
 
 ## 45 Minute CI Build
