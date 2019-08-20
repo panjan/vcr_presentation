@@ -82,6 +82,10 @@ end
 - all blocks (not recorded by default)(https://github.com/gooddata/gooddata-ruby/blob/master/spec/spec_helper.rb#L70)
 - [parallelism](https://github.com/gooddata/gooddata-ruby/blob/master/spec/spec_helper.rb#L60)
 
+<aside class="notes">
+    well isolated tests needed
+</aside>
+
 ## Development Overhead
 - re-recording cassettes with almost every change
 - recording cassettes could be automated
