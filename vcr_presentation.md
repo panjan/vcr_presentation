@@ -38,11 +38,11 @@ config.register_request_matcher :my_matcher do |req_1, req_2|
 end
 ```
 
+# Why we used it?
+
 <aside class="notes">
     I came to the company to work on a project which had a...
 </aside>
-
-# Why we used it?
 
 ## 45 Minute CI Build
 ![slow build](slow_build.png)
@@ -54,7 +54,7 @@ end
 - hitting request limits
 
 <aside class="notes">
-    ...45 minute CI build. This wasn't your ordinary Rails app, but an SDK which makes a lot of HTTP requests. With almost no mocked unit tests, development was sluggish and frustrating. Imagine you make a PR and after 45 minutes you learn the testing server was down and have to rerun the build. After another 45 minutes you find a small bug, fix it, rerun and so on.
+    ...45 minute CI build which ran on every PR. This wasn't your ordinary Rails app, but an SDK which makes a lot of HTTP requests. With almost no mocked unit tests, development was sluggish and frustrating. Imagine you make a PR and after 45 minutes you learn the testing server was down and have to rerun the build. After another 45 minutes you find a small bug, fix it, rerun and so on.
 </aside>
 
 ## Solution Attempt #1
