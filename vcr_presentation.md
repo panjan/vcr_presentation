@@ -10,10 +10,9 @@ theme: black
 - records your test suite's HTTP interactions and replays them during future test runs for fast, deterministic, accurate tests
 - [https://github.com/vcr/vcr](https://github.com/vcr/vcr)
 
-# How it works?
-
-- checks HTTP method and URI (and optionally body)
-- matchers for nondeterministic URIs
+<aside class="notes">
+    Was using VCR in my previous job. I'd like to talk about how it helped us to a fast and stable continuous integration. But also about problems we had with it.
+</aside>
 
 # Time for a Demo
 
@@ -23,6 +22,15 @@ theme: black
     3) bundle exec rspec test.rb
     4) git status & explain ./cassettes
     5) run test again - fast and deterministic this time
+</aside>
+
+# How it works?
+
+- checks HTTP method and URI (and optionally body)
+- matchers for nondeterministic URIs
+
+<aside class="notes">
+    I came to the company to work on a project which had a...
 </aside>
 
 # Why we used it?
@@ -35,6 +43,10 @@ theme: black
 - every glitch of the staging server fails the build
 - high load on the staging server
 - hitting request limits
+
+<aside class="notes">
+    ...45 minute CI build. This wasn't your ordinary Rails app, but an SDK which makes a lot of HTTP requests. With almost no mocked unit tests, development was sluggish and frustrating. Imagine you make a PR and after 45 minutes you learn the testing server was down and have to rerun the build. After another 45 minutes you find a small bug, fix it, rerun and so on.
+</aside>
 
 ## Solution Attempt #1
 
