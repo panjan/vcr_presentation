@@ -16,25 +16,58 @@ theme: black
     Was using VCR in my previous job. I'd like to talk about how it helped us to a fast and stable continuous integration. But also about problems we had with it.
 </aside>
 
-# Time for a Demo
+# Example
+
+``` ruby
+require 'vcr'
+
+VCR.configure do |c|
+  c.cassette_library_dir = 'cassettes'
+  c.hook_into :webmock
+  c.configure_rspec_metadata!
+  c.default_cassette_options = { :record => :new_episodes }
+end
+
+describe "VCR", :vcr do
+  it 'records an http request' do
+    5.times do
+      puts Net::HTTP.get_response('localhost', '/', 4567).body
+    end
+  end
+end
+```
+
+# Example Server
+
+``` ruby
+require 'sinatra'
+
+get '/' do
+  sleep 1
+  'Hello Ruby Stories!'
+end
+```
+
+# Demo
+
+<video src="vcr_demo.mov"></video>
 
 <aside class="notes">
-    1) explain server.rb
-    2) explain test.rb
-    3) bundle exec rspec test.rb
-    4) run test again - fast and deterministic this time
-    5) git status & explain ./cassettes
-    6) test.rb: 5.times -> 6.times and run test again
+    1) bundle exec rspec test.rb
+    2) run test again - fast and deterministic this time
+    3) git status & explain ./cassettes
+    4) test.rb: 5.times -> 6.times and run test again
 </aside>
 
 # How it works?
 
-- checks HTTP method and URI (and optionally body)
+- checks HTTP method, URI, host, path, body and headers
 - matchers for nondeterministic URIs
 
 ``` ruby
-config.register_request_matcher :my_matcher do |req_1, req_2|
-  # compare requests here
+random_id_matcher = lambda do |actual, recorded|
+  random_id_regex = %r{/uploads/.+}
+  actual.parsed_uri.path.match random_id_regex
 end
 ```
 
