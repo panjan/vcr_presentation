@@ -1,0 +1,425 @@
+
+
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+
+		<title>VCR - War Stories</title>
+
+		<meta name="description" content="VCR War Stories">
+		<meta name="author"      content="Jan Zdráhal">
+
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/black.css" id="theme">
+
+		<!-- Theme used for syntax highlighting of code -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+
+		<!--[if lt IE 9]>
+		<script src="lib/js/html5shiv.js"></script>
+		<![endif]-->
+	</head>
+
+	<body>
+
+		<div class="reveal">
+
+			<!-- Any section element inside of this container is displayed as a slide -->
+			<div class="slides">
+				<section>
+					<h1>VCR</h1>
+					<h3>War Stories</h3>
+					<p>
+						<small>by Jan Zdráhal</small>
+					</p>
+				</section>
+
+        
+        <section>
+          
+<!-- _S9SLIDE_ -->
+<h1 id="whats-vcr">What’s VCR?</h1>
+
+<p><img src="vcr.jpg" alt="Video Cassette Recorder" /></p>
+
+<aside class="notes">
+  I'm a user of the Ruby Gem VCR which I'll be talking about today. But first, younger people in the audience might need reminding what VCR is. It stands for video cassette recorder and it's the thing in the picture.
+
+  But it's also a ruby gem...
+</aside>
+
+
+
+        </section>
+        
+        <section>
+          <!-- _S9SLIDE_ -->
+<h1 id="whats-vcr-1">What’s VCR?</h1>
+
+<ul>
+  <li>records your test suite’s HTTP interactions and replays them during future test runs for fast, deterministic, accurate tests</li>
+  <li><a href="https://github.com/vcr/vcr">https://github.com/vcr/vcr</a></li>
+</ul>
+
+<aside class="notes">
+    The VCR gem records your HTTP requests made during tests so that you can "replay" them later for fast and deterministic tests. This is very useful for testing integration with third-party services. I'd like to talk about how VCR helped my team to a fast and stable continuous integration build. But also about some problems I've encountered and when it's better to use something else.
+
+    Q: I'll start with a question. Who has used VCR before?
+</aside>
+
+
+
+        </section>
+        
+        <section>
+          <!-- _S9SLIDE_ -->
+<h1 id="example">Example</h1>
+
+<pre><code class="language-ruby">require 'vcr'
+
+VCR.configure do |c|
+  c.cassette_library_dir = 'cassettes'
+  c.hook_into :webmock
+  c.configure_rspec_metadata!
+  c.default_cassette_options = { :record =&gt; :new_episodes }
+end
+
+describe "VCR", :vcr do
+  it 'records an http request' do
+    5.times do
+      puts Net::HTTP.get_response('localhost', '/', 4567).body
+    end
+  end
+end
+</code></pre>
+
+<aside class="notes">
+    I prepared a small example of a test that uses VCR. The first block contains all the necessary VCR-related configuration. The second block is an RSpec test which makes 5 HTTP GETs to a local server. Note the :vcr symbol which goes to `describe` as a parameter - it tells VCR to record this test.
+</aside>
+
+
+
+        </section>
+        
+        <section>
+          <!-- _S9SLIDE_ -->
+<h1 id="example-server">Example Server</h1>
+
+<pre><code class="language-ruby">require 'sinatra'
+
+get '/' do
+  sleep 1
+  'Hello Ruby Stories!'
+end
+</code></pre>
+
+<aside class="notes">
+    Here's code for the server. It's a lazy server because it sleeps 1 second before returning the string "Hello Ruby Stories!".
+
+    Questions?
+
+    Now let's spin up the tape recorder and capture some requests.
+</aside>
+
+
+
+        </section>
+        
+        <section>
+          <!-- _S9SLIDE_ -->
+<h1 id="demo">Demo</h1>
+
+<video src="vcr_demo.mov"></video>
+
+<aside class="notes">
+    I recorded a little demo so that you can see how VCR looks in action.
+
+    1) First we run the test we saw earlier...
+    2) run test again - fast and deterministic this time
+    3) git status &amp; explain ./cassettes
+    4) test.rb: 5.times -&gt; 6.times and run test again
+
+    Questions?
+</aside>
+
+
+
+        </section>
+        
+        <section>
+          <!-- _S9SLIDE_ -->
+<h1 id="how-it-works">How it works?</h1>
+
+<ul>
+  <li>checks HTTP method, URI, host, path, body and headers</li>
+  <li>matchers for nondeterministic URIs</li>
+</ul>
+
+<pre><code class="language-ruby">random_id_matcher = lambda do |actual, recorded|
+  random_id_regex = %r{/uploads/.+}
+  actual.parsed_uri.path.match random_id_regex
+end
+</code></pre>
+
+<aside class="notes">
+    The comparison of recorded vs actual requests is done by comparing the HTTP method and URI. There are also built-in matchers for host, path, body and headers.
+
+    You may wonder what happens when you're testing some resource with a random element like a timestamp in the url. That's where custom matchers come into play.
+
+    Questions?
+</aside>
+
+
+
+        </section>
+        
+        <section>
+          <!-- _S9SLIDE_ -->
+<h1 id="why-we-used-it">Why we used it?</h1>
+
+<aside class="notes">
+    Now for the promised war stories. :-) In my last job I was fortunate to be the maintainer of a ruby sdk which led me to finding about and using VCR. And here's why I used it.
+</aside>
+
+
+
+        </section>
+        
+        <section>
+          <!-- _S9SLIDE_ -->
+<h2 id="45-minute-ci-build">45 Minute CI Build</h2>
+<p><img src="slow_build.png" alt="slow build" /></p>
+<ul>
+  <li>caused by a lot of integration tests</li>
+  <li>ran on every PR</li>
+  <li>45 minutes to find out your code is broken</li>
+  <li>every glitch of the staging server fails the build</li>
+  <li>high load on the staging server</li>
+  <li>hitting request limits</li>
+</ul>
+
+<aside class="notes">
+    An sdk obviously makes a lot of requests and we ended up with a 45 minute CI build which ran on every PR. With very little mocked unit tests, development was starting to get sluggish. Imagine you make a PR and after 45 minutes you learn the testing server was down and have to rerun the build.
+
+    Q: Who has a shorter/longer CI build?
+
+    With so many integration tests we were causing trouble not only to ourselves but also to others by putting high load on the staging server, often hitting request limits.
+
+    So we decided to act...
+</aside>
+
+
+
+        </section>
+        
+        <section>
+          <!-- _S9SLIDE_ -->
+<h2 id="solution-attempt-1">Solution Attempt #1</h2>
+
+<ul>
+  <li>running unit tests with every PR and integration tests only once a day</li>
+  <li>too many bugs getting to the develop branch</li>
+  <li>we would learn about our bugs the next day (after switching context)</li>
+</ul>
+
+
+
+        </section>
+        
+        <section>
+          <!-- _S9SLIDE_ -->
+<h2 id="the-solution">The Solution</h2>
+
+<blockquote>
+  <p>With VCR, the same test suite finishes in under 5 minutes. That’s 88% faster!
+<img src="fast_build.png" alt="fast build" /></p>
+</blockquote>
+
+<ul>
+  <li>live tests <a href="https://travis-ci.org/gooddata/gooddata-ruby/builds/520872126">running every day</a></li>
+</ul>
+
+<aside class="notes">
+  So we used VCR and suddenly the build shortened from 45 minutes to 5. In order to discover changes/bugs on the server, we still ran the "live" tests every day. Sounds cool, right?
+</aside>
+
+
+
+        </section>
+        
+        <section>
+          <!-- _S9SLIDE_ -->
+<h1 id="problems">Problems</h1>
+
+<blockquote>
+  <p>Making your tests run under VCR is not a walk in the park.</p>
+</blockquote>
+
+
+
+        </section>
+        
+        <section>
+          <!-- _S9SLIDE_ -->
+<h2 id="initial-investment">Initial Investment</h2>
+
+<ul>
+  <li>VCRizing the tests took two weeks (the dev was new to the project and language though)</li>
+  <li>all blocks (not recorded by default)(https://github.com/gooddata/gooddata-ruby/blob/master/spec/spec_helper.rb#L70)</li>
+  <li><a href="https://github.com/gooddata/gooddata-ruby/blob/master/spec/spec_helper.rb#L60">parallelism</a></li>
+</ul>
+
+<aside class="notes">
+  There was a substantial initial investment. It took two man-weeks to overcome all problems we encountered. For example, we discovered that the order of requests is important so VCR doesn't go well with parallellism. We had to do little hacks here and there. [click on parallellism] Then we discovered that VCR doesn't record rspec all blocks by default. And there's a good reason for that. Here's a little riddle.
+</aside>
+
+
+
+        </section>
+        
+        <section>
+          <!-- _S9SLIDE_ -->
+<h2 id="time-for-a-riddle">Time for a Riddle</h2>
+
+<pre><code class="language-ruby">describe 'all block riddle' do
+  before(:all) do
+    user_id = server.create_user
+  end
+
+  it 'does something' do
+    server.do_something_with_user user_id
+  end
+
+  it 'does something else' do
+    server.do_something_else_with_user user_id
+  end
+end
+</code></pre>
+
+<aside class="notes">
+  What do you think will happen when we record the whole test suite (including the before all block) and then we re-record only one of the two examples?
+</aside>
+
+
+
+        </section>
+        
+        <section>
+          <!-- _S9SLIDE_ -->
+<h2 id="development-overhead">Development Overhead</h2>
+<ul>
+  <li>re-recording cassettes with every change</li>
+  <li>recording cassettes could be automated</li>
+  <li>writing matchers cannot be automated</li>
+  <li>problems with recording from the middle of the test suite (e.g. <a href="https://github.com/gooddata/gooddata-ruby/blob/master/spec/vcr_configurer.rb#L65-L71">project cache</a>)</li>
+  <li>where to store 390M of cassettes?</li>
+</ul>
+
+<aside class="notes">
+  After overcoming the initial investment, there's the development overhead. After every change that affects HTTP interactions, you have to re-record the cassettes. Fortunately, IMHO it could be automated but we did manually. What can't be automated is writing matchers. Every time there's some randomness, you write a matcher. The riddle we did was a nice example of problems with re-recording from the middle of the testsuite. The last thing to consider is where to store your cassettes. Our SDK tests produced a tremendous amount of cassette files which totalled to 390MB.
+</aside>
+
+
+
+        </section>
+        
+        <section>
+          <!-- _S9SLIDE_ -->
+<h2 id="when-to-use-something-else">When to Use Something Else</h2>
+
+<ul>
+  <li>emulators (e.g. Google Datastore emulator)</li>
+  <li>mock libraries (e.g. redis-mock)</li>
+  <li>manual mocks</li>
+</ul>
+
+<aside class="notes">
+  That being said, I'd like to talk about alternatives we have when it comes to testing third party services. Some of them have standalone emulators which can be run locally (like Google Datastore emulator). Some services have mock-libraries which mimick the real behaviour. And the last option is simply writing manual mocks. So my advice is - every time  you're deciding on how to test HTTP interactions, go through this short list a pick the most suitable option. Also, if you're testing your own server (for example like we did with the SDK), consider avoiding writing integration tests. For example, at my current job, we're generating an SDK from an open-api specification, eliminating the need for extensive testing. Also we're generating mocks from the specification so manual mocking becomes much easier.
+
+  Questions?
+</aside>
+
+
+
+        </section>
+        
+        <section>
+          <!-- _S9SLIDE_ -->
+<h2 id="unit-tests">Unit Tests?</h2>
+<ul>
+  <li>it’s tempting not to write unit tests</li>
+  <li>unit tests are needed for covering edge cases</li>
+  <li>if it’s hard to write tests, the code is probably too complex</li>
+  <li>fortunately test coverage can be checked automatically (e.g. Coveralls)</li>
+</ul>
+
+<aside class="notes">
+  After witnessing the power of VCR, it might be tempting to abandon unit tests all together. But I have to advice you against it because unit tests are always needed for covering edge cases, especially in duck-typed languages such as Ruby.
+</aside>
+
+
+
+        </section>
+        
+        <section>
+          <!-- _S9SLIDE_ -->
+<h1 id="summary">Summary</h1>
+
+<aside class="notes">
+    To sum up, VCR helped us make our 45 minute CI build run in under 5 minutes. The build is reliable and doesn't produce load on the staging server. Developers are happier and more productive because of the fast turn-around. There was a substantial initial investment and there is some development overhead (recording, writing matchers, troubleshooting). In our case, the benefits significantly outweigh the costs. Hopefully you've learned something new from my presentation. I wish you happy recording.
+
+    Questions?
+</aside>
+
+
+        </section>
+        
+
+			</div>
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.js"></script>
+
+		<script>
+
+			// More info https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: true,
+				progress: true,
+				history: true,
+				center: true,
+
+				transition: 'slide', // none/fade/slide/convex/concave/zoom
+
+				// More info https://github.com/hakimel/reveal.js#dependencies
+				dependencies: [
+					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: 'plugin/zoom-js/zoom.js', async: true },
+					{ src: 'plugin/notes/notes.js', async: true }
+				]
+			});
+
+		</script>
+
+	</body>
+</html>

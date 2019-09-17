@@ -8,15 +8,19 @@ theme: black
 
 ![Video Cassette Recorder](vcr.jpg)
 
+<aside class="notes">
+  I'm a user of the Ruby Gem VCR which I'll be talking about today. But first, younger people in the audience might need reminding what VCR is. It stands for video cassette recorder and it's the thing in the picture.
+
+  But it's also a ruby gem...
+</aside>
+
 # What's VCR?
 
 - records your test suite's HTTP interactions and replays them during future test runs for fast, deterministic, accurate tests
 - [https://github.com/vcr/vcr](https://github.com/vcr/vcr)
 
 <aside class="notes">
-    Artikulovat, zrychlit, rozkliknout odkazy. Go into detail about/better explain problems - like project. Zaver v odrazkach. Other langs. why - usually 3rd party services. code generation. photo of a vcr
-
-    I'm a user of the Ruby Gem VCR which records your HTTP requests made during tests so that you can "replay" them later for fast and deterministic tests. I'd like to talk about how VCR helped my team to a fast and stable continuous integration build. But also about some problems I've encountered and when it's better to use something else.
+    The VCR gem records your HTTP requests made during tests so that you can "replay" them later for fast and deterministic tests. This is very useful for testing integration with third-party services. I'd like to talk about how VCR helped my team to a fast and stable continuous integration build. But also about some problems I've encountered and when it's better to use something else.
 
     Q: I'll start with a question. Who has used VCR before?
 </aside>
@@ -103,7 +107,7 @@ end
 # Why we used it?
 
 <aside class="notes">
-    Now for the war stories. :-)
+    Now for the promised war stories. :-) In my last job I was fortunate to be the maintainer of a ruby sdk which led me to finding about and using VCR. And here's why I used it.
 </aside>
 
 ## 45 Minute CI Build
@@ -116,9 +120,11 @@ end
 - hitting request limits
 
 <aside class="notes">
-    We had a 45 minute CI build which ran on every PR. This wasn't your ordinary Rails app, but an SDK which makes a lot of HTTP requests. With very little mocked unit tests, development was starting to get sluggish. Imagine you make a PR and after 45 minutes you learn the testing server was down and have to rerun the build.
+    An sdk obviously makes a lot of requests and we ended up with a 45 minute CI build which ran on every PR. With very little mocked unit tests, development was starting to get sluggish. Imagine you make a PR and after 45 minutes you learn the testing server was down and have to rerun the build.
 
-    Also we were causing trouble to others by putting high load on the staging server, often hitting request limits.
+    Q: Who has a shorter/longer CI build?
+
+    With so many integration tests we were causing trouble not only to ourselves but also to others by putting high load on the staging server, often hitting request limits.
 
     So we decided to act...
 </aside>
@@ -136,6 +142,11 @@ end
 
 - live tests [running every day](https://travis-ci.org/gooddata/gooddata-ruby/builds/520872126)
 
+<aside class="notes">
+  So we used VCR and suddenly the build shortened from 45 minutes to 5. In order to discover changes/bugs on the server, we still ran the "live" tests every day. Sounds cool, right?
+</aside>
+
+
 # Problems
 
 > Making your tests run under VCR is not a walk in the park.
@@ -147,7 +158,29 @@ end
 - [parallelism](https://github.com/gooddata/gooddata-ruby/blob/master/spec/spec_helper.rb#L60)
 
 <aside class="notes">
-    well isolated tests needed
+  There was a substantial initial investment. It took two man-weeks to overcome all problems we encountered. For example, we discovered that the order of requests is important so VCR doesn't go well with parallellism. We had to do little hacks here and there. [click on parallellism] Then we discovered that VCR doesn't record rspec all blocks by default. And there's a good reason for that. Here's a little riddle.
+</aside>
+
+## Time for a Riddle
+
+``` ruby
+describe 'all block riddle' do
+  before(:all) do
+    user_id = server.create_user
+  end
+
+  it 'does something' do
+    server.do_something_with_user user_id
+  end
+
+  it 'does something else' do
+    server.do_something_else_with_user user_id
+  end
+end
+```
+
+<aside class="notes">
+  What do you think will happen when we record the whole test suite (including the before all block) and then we re-record only one of the two examples?
 </aside>
 
 ## Development Overhead
@@ -157,11 +190,21 @@ end
 - problems with recording from the middle of the test suite (e.g. [project cache](https://github.com/gooddata/gooddata-ruby/blob/master/spec/vcr_configurer.rb#L65-L71))
 - where to store 390M of cassettes?
 
+<aside class="notes">
+  After overcoming the initial investment, there's the development overhead. After every change that affects HTTP interactions, you have to re-record the cassettes. Fortunately, IMHO it could be automated but we did manually. What can't be automated is writing matchers. Every time there's some randomness, you write a matcher. The riddle we did was a nice example of problems with re-recording from the middle of the testsuite. The last thing to consider is where to store your cassettes. Our SDK tests produced a tremendous amount of cassette files which totalled to 390MB.
+</aside>
+
 ## When to Use Something Else
 
 - emulators (e.g. Google Datastore emulator)
 - mock libraries (e.g. redis-mock)
 - manual mocks
+
+<aside class="notes">
+  That being said, I'd like to talk about alternatives we have when it comes to testing third party services. Some of them have standalone emulators which can be run locally (like Google Datastore emulator). Some services have mock-libraries which mimick the real behaviour. And the last option is simply writing manual mocks. So my advice is - every time  you're deciding on how to test HTTP interactions, go through this short list a pick the most suitable option. Also, if you're testing your own server (for example like we did with the SDK), consider avoiding writing integration tests. For example, at my current job, we're generating an SDK from an open-api specification, eliminating the need for extensive testing. Also we're generating mocks from the specification so manual mocking becomes much easier.
+
+  Questions?
+</aside>
 
 ## Unit Tests?
 - it's tempting not to write unit tests
@@ -169,9 +212,15 @@ end
 - if it's hard to write tests, the code is probably too complex
 - fortunately test coverage can be checked automatically (e.g. Coveralls)
 
+<aside class="notes">
+  After witnessing the power of VCR, it might be tempting to abandon unit tests all together. But I have to advice you against it because unit tests are always needed for covering edge cases, especially in duck-typed languages such as Ruby.
+</aside>
+
 # Summary
 
 <aside class="notes">
-    To sum up, VCR helped us make our 45 minute CI build run in under 5 minutes. The build is reliable and doesn't produce load on the staging server. Developers are happier and more productive because of the fast turn-around. There was a substantial initial investment and there is some development overhead (recording, writing matchers, troubleshooting). In our case, the benefits significantly outweigh the costs.
+    To sum up, VCR helped us make our 45 minute CI build run in under 5 minutes. The build is reliable and doesn't produce load on the staging server. Developers are happier and more productive because of the fast turn-around. There was a substantial initial investment and there is some development overhead (recording, writing matchers, troubleshooting). In our case, the benefits significantly outweigh the costs. Hopefully you've learned something new from my presentation. I wish you happy recording.
+
+    Questions?
 </aside>
 
