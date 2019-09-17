@@ -11,9 +11,11 @@ theme: black
 - [https://github.com/vcr/vcr](https://github.com/vcr/vcr)
 
 <aside class="notes">
-    I'm a user of VCR and its clones in other languages. I'd like to talk about how it helped my team to fast and stable continuous integration. But also about some problems I've encountered and when it's better to use something else.
+    Artikulovat, zrychlit, rozkliknout odkazy. Go into detail about/better explain problems - like project. Zaver v odrazkach.
 
-    Q: Who has used VCR before?
+    I'm a user of VCR and its clones in other languages. I'd like to talk about how it helped my team to a fast and stable continuous integration build. But also about some problems I've encountered and when it's better to use something else.
+
+    Q: I'll start with a question. Who has used VCR before?
 </aside>
 
 # Example
@@ -126,21 +128,21 @@ end
 - problems with recording from the middle of the test suite (e.g. [project cache](https://github.com/gooddata/gooddata-ruby/blob/master/spec/vcr_configurer.rb#L65-L71))
 - where to store 390M of cassettes?
 
-## Unit Tests?
-- it's tempting not to write unit tests
-- unit tests are needed for covering edge cases
-- if it's hard to write tests, the code is probably too complex
-- fortunately test coverage can be checked automatically (e.g. Coveralls)
-
 ## When to Use Something Else
 
 - emulators (e.g. Google Datastore emulator)
 - mock libraries (e.g. redis-mock)
 - manual mocks
 
+## Unit Tests?
+- it's tempting not to write unit tests
+- unit tests are needed for covering edge cases
+- if it's hard to write tests, the code is probably too complex
+- fortunately test coverage can be checked automatically (e.g. Coveralls)
+
 # Summary
 
 <aside class="notes">
-    VCR helped us make our 45 minute CI build run in under 5 minutes. The build is reliable and doesn't produce load on the staging server. Developers are happier and more productive because of the fast turn-around. There was a substantial initial investment and there is some development overhead (recording, writing matchers, troubleshooting). In our case, the benefits significantly outweigh the costs.
+    To sum up, VCR helped us make our 45 minute CI build run in under 5 minutes. The build is reliable and doesn't produce load on the staging server. Developers are happier and more productive because of the fast turn-around. There was a substantial initial investment and there is some development overhead (recording, writing matchers, troubleshooting). In our case, the benefits significantly outweigh the costs.
 </aside>
 
