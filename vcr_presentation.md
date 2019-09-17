@@ -11,9 +11,9 @@ theme: black
 - [https://github.com/vcr/vcr](https://github.com/vcr/vcr)
 
 <aside class="notes">
-    Before presentation rm -rf cassettes/
+    I'm a user of VCR and its clones in other languages. I'd like to talk about how it helped my team to fast and stable continuous integration. But also about some problems I've encountered and when it's better to use something else.
 
-    Was using VCR in my previous job. I'd like to talk about how it helped us to a fast and stable continuous integration. But also about problems we had with it.
+    Q: Who has used VCR before?
 </aside>
 
 # Example
@@ -36,6 +36,10 @@ describe "VCR", :vcr do
   end
 end
 ```
+
+<aside class="notes">
+    I prepared a small example of a test that uses VCR.
+</aside>
 
 # Example Server
 
@@ -73,10 +77,6 @@ end
 
 # Why we used it?
 
-<aside class="notes">
-    I came to the company to work on a project which had a...
-</aside>
-
 ## 45 Minute CI Build
 ![slow build](slow_build.png)
 - caused by a lot of integration tests
@@ -87,7 +87,7 @@ end
 - hitting request limits
 
 <aside class="notes">
-    ...45 minute CI build which ran on every PR. This wasn't your ordinary Rails app, but an SDK which makes a lot of HTTP requests. With almost no mocked unit tests, development was sluggish and frustrating. Imagine you make a PR and after 45 minutes you learn the testing server was down and have to rerun the build. After another 45 minutes you find a small bug, fix it, rerun and so on.
+    We had a 45 minute CI build which ran on every PR. This wasn't your ordinary Rails app, but an SDK which makes a lot of HTTP requests. With almost no mocked unit tests, development was sluggish and frustrating. Imagine you make a PR and after 45 minutes you learn the testing server was down and have to rerun the build.
 </aside>
 
 ## Solution Attempt #1
@@ -120,7 +120,7 @@ end
 </aside>
 
 ## Development Overhead
-- re-recording cassettes with almost every change
+- re-recording cassettes with every change
 - recording cassettes could be automated
 - writing matchers cannot be automated
 - problems with recording from the middle of the test suite (e.g. [project cache](https://github.com/gooddata/gooddata-ruby/blob/master/spec/vcr_configurer.rb#L65-L71))
@@ -132,5 +132,15 @@ end
 - if it's hard to write tests, the code is probably too complex
 - fortunately test coverage can be checked automatically (e.g. Coveralls)
 
+## When to Use Something Else
+
+- emulators (e.g. Google Datastore emulator)
+- mock libraries (e.g. redis-mock)
+- manual mocks
+
 # Summary
-> VCR helped us make our 45 minute CI build run in under 5 minutes. The build is reliable and doesn't produce load on the staging server. Developers are happier and more productive because of the fast turn-around. There was a substantial initial investment and there is some development overhead (recording, writing matchers, troubleshooting). In our case, the benefits significantly outweigh the costs.
+
+<aside class="notes">
+    VCR helped us make our 45 minute CI build run in under 5 minutes. The build is reliable and doesn't produce load on the staging server. Developers are happier and more productive because of the fast turn-around. There was a substantial initial investment and there is some development overhead (recording, writing matchers, troubleshooting). In our case, the benefits significantly outweigh the costs.
+</aside>
+
