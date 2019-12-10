@@ -154,7 +154,7 @@ end
 ## Initial Investment
 
 - VCRizing the tests took two weeks (the dev was new to the project and language though)
-- all blocks (not recorded by default)(https://github.com/gooddata/gooddata-ruby/blob/master/spec/spec_helper.rb#L70)
+- all blocks [not recorded by default](https://github.com/gooddata/gooddata-ruby/blob/master/spec/spec_helper.rb#L70)
 - [parallelism](https://github.com/gooddata/gooddata-ruby/blob/master/spec/spec_helper.rb#L60)
 
 <aside class="notes">
