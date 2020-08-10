@@ -35,7 +35,7 @@ GEM
     props (1.2.0)
       iniparser (>= 0.1.0)
     public_suffix (3.1.1)
-    rack (2.0.8)
+    rack (2.2.3)
     rack-protection (2.0.5)
       rack
     rexml (3.2.4)
